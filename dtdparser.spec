@@ -36,7 +36,7 @@
 
 Name:           dtdparser
 Version:        1.21
-Release:        %mkrel 3.2.1
+Release:        %mkrel 3.2.2
 Epoch:          0
 Summary:        A Java DTD Parser
 License:        LGPL
@@ -54,8 +54,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if %{gcj_support}
 BuildRequires:                java-gcj-compat-devel
-Requires(post):                java-gcj-compat
-Requires(postun):        java-gcj-compat
 %endif
 
 %description
