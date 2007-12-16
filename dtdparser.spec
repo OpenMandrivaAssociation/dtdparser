@@ -36,13 +36,14 @@
 
 Name:           dtdparser
 Version:        1.21
-Release:        %mkrel 3.2.2
+Release:        %mkrel 3.2.3
 Epoch:          0
 Summary:        A Java DTD Parser
 License:        LGPL
 Source0:        http://wutka.com/download/%{name}-%{version}.tgz
 URL:            http://wutka.com/dtdparser.html
 BuildRequires:  ant
+BuildRequires:  java-rpmbuild
 Requires:       java
 Requires:       jpackage-utils >= 0:1.6
 Requires(postun): jpackage-utils >= 0:1.6 
