@@ -36,7 +36,7 @@
 
 Name:           dtdparser
 Version:        1.21
-Release:        %mkrel 3.2.5
+Release:        %mkrel 3.2.6
 Epoch:          0
 Summary:        A Java DTD Parser
 License:        LGPL
