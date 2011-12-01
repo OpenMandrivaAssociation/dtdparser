@@ -87,17 +87,17 @@ find . -name "*.jar" -exec rm -f {} \;
 # -----------------------------------------------------------------------------
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 # jars
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
+install -d -m 755 %{buildroot}%{_javadir}
 install -m 644 dist/%{name}120.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+  %{buildroot}%{_javadir}/%{name}-%{version}.jar
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
 # javadoc
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -pr doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}
+cp -pr doc/* %{buildroot}%{_javadocdir}/%{name}
 
 # -----------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ cp -pr doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 %endif
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 # -----------------------------------------------------------------------------
 
