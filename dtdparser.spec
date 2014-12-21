@@ -1,3 +1,4 @@
+%{?_javapackages_macros:%_javapackages_macros}
 # Copyright (c) 2000-2007, JPackage Project
 # All rights reserved.
 #
@@ -28,34 +29,31 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define _with_gcj_support 1
-
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
-
-%define section         free
-
 Name:           dtdparser
 Version:        1.21
-Release:        3.2.15
-Epoch:          0
+Release:        15.1
 Summary:        A Java DTD Parser
-License:        LGPL
-Source0:        http://wutka.com/download/%{name}-%{version}.tgz
-URL:            http://wutka.com/dtdparser.html
-BuildRequires:  ant
-BuildRequires:  locales-en
-BuildRequires:  java-rpmbuild
-Requires:       java
-Requires:       jpackage-utils >= 0:1.6
-Requires(postun): jpackage-utils >= 0:1.6 
-Group:          Development/Java
-%if ! %{gcj_support}
-BuildArch:      noarch
-%endif
+Group:		Development/Java
 
-%if %{gcj_support}
-BuildRequires:                java-gcj-compat-devel
-%endif
+# The code has no license attribution.
+# There is a LICENSE.INFO file, but it does not specify versions.
+# The only versioning is in the ASL_LICENSE file, which has been edited by the upstream.
+License:        LGPLv2+ or ASL 1.1
+URL:            http://wutka.com/%{name}.html
+BuildArch:      noarch
+
+Source0:        http://sourceforge.net/projects/%{name}/files/%{name}/%{version}/%{name}-%{version}.tgz
+Source1:        http://repo1.maven.org/maven2/com/wutka/%{name}/%{version}/%{name}-%{version}.pom
+
+# Without removing these comments, build fails
+Patch0:         %{name}-unmappable-chars-in-comments.patch
+
+BuildRequires:  ant
+BuildRequires:  java-devel
+BuildRequires:  jpackage-utils
+
+Requires:       java-headless
+Requires:       jpackage-utils
 
 %description
 DTD parsers for Java seem to be pretty scarce. That's probably because
@@ -65,110 +63,83 @@ use this library to parse a DTD.
 
 %package javadoc
 Summary:        Javadoc for %{name}
-Group:          Development/Java
-Requires:       jpackage-utils >= 0:1.6
-Requires(postun): jpackage-utils >= 0:1.6 
 
 %description javadoc
 Javadoc for %{name}.
 
-# -----------------------------------------------------------------------------
-
 %prep
 %setup -q
-# remove all binary libs
-find . -name "*.jar" -exec rm -f {} \;
+find -name \*.jar -delete -o -name \*.class -delete
 
-# -----------------------------------------------------------------------------
+echo com.wutka.dtd > doc/package-list
+
+sed -i "s,59 Temple Place,51 Franklin Street,;s,Suite 330,Fifth Floor,;s,02111-1307,02110-1301," LICENSE
+
+%patch0
 
 %build
-export LC_ALL=ISO-8859-1
-%{ant} build createdoc
-
-# -----------------------------------------------------------------------------
+ant build createdoc
 
 %install
 # jars
 install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -m 644 dist/%{name}120.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+install -m 644 dist/%{name}120.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
 # javadoc
 install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -pr doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-# -----------------------------------------------------------------------------
+# POM
+install -d -m 0755 $RPM_BUILD_ROOT%{_mavenpomdir}
+install -p -m 0644 %{SOURCE1} $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
+%add_maven_depmap JPP-%{name}.pom %{name}.jar
 
-# -----------------------------------------------------------------------------
+%files -f .mfiles
+%doc CHANGES LICENSE README ASL_LICENSE
 
-%if %{gcj_support}
-%post
-%{update_gcjdb}
-
-%postun
-%{clean_gcjdb}
-%endif
-
-%files
-%defattr(0644,root,root,0755)
-%doc CHANGES LICENSE README
-%{_javadir}/*
-
-%if %{gcj_support}
-%dir %attr(-,root,root) %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/dtdparser-1.21.jar.*
-%endif
 
 %files javadoc
-%defattr(0644,root,root,0755)
 %doc %{_javadocdir}/*
-
-# -----------------------------------------------------------------------------
-
+%doc LICENSE ASL_LICENSE
 
 %changelog
-* Tue May 03 2011 Oden Eriksson <oeriksson@mandriva.com> 0:1.21-3.2.7mdv2011.0
-+ Revision: 663891
-- mass rebuild
+* Tue Jun 10 2014 Gerard Ryan <galileo@fedoraproject.org> - 1.21-15
+- Generate maven metadata for dtdparser
 
-* Thu Dec 02 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.21-3.2.6mdv2011.0
-+ Revision: 604831
-- rebuild
+* Sun Jun 08 2014 Gerard Ryan <galileo@fedoraproject.org> - 1.21-14
+- Remove old maven depmap stuff
 
-* Tue Mar 16 2010 Oden Eriksson <oeriksson@mandriva.com> 0:1.21-3.2.5mdv2010.1
-+ Revision: 522539
-- rebuilt for 2010.1
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.21-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
-* Sun Aug 09 2009 Oden Eriksson <oeriksson@mandriva.com> 0:1.21-3.2.4mdv2010.0
-+ Revision: 413411
-- rebuild
+* Sun Mar 02 2014 Gerard Ryan <galileo@fedoraproject.org> - 1.21-12
+- RHBZ-1068030: Switch to java-headless requires
 
-* Wed Jan 02 2008 Olivier Blin <oblin@mandriva.com> 0:1.21-3.2.3mdv2009.0
-+ Revision: 140722
-- restore BuildRoot
+* Fri Aug 23 2013 Gerard Ryan <galileo@fedoraproject.org> - 1.21-11
+- Bump release
 
-  + Thierry Vignaud <tv@mandriva.org>
-    - kill re-definition of %%buildroot on Pixel's request
+* Mon Jul 29 2013 Gerard Ryan <galileo@fedoraproject.org> - 1.21-10
+- RHBZ-989265: Fix problems found in review request.
 
-* Sun Dec 16 2007 Anssi Hannula <anssi@mandriva.org> 0:1.21-3.2.3mdv2008.1
-+ Revision: 120807
-- buildrequires java-rpmbuild
+* Sat Jul 27 2013 Gerard Ryan <galileo@fedoraproject.org> - 1.21-9
+- Unkill and clean up package.
 
-* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:1.21-3.2.2mdv2008.0
-+ Revision: 87342
-- rebuild to filter out autorequires of GCJ AOT objects
-- remove unnecessary Requires(post) on java-gcj-compat
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.21-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Wed Jul 04 2007 David Walluck <walluck@mandriva.org> 0:1.21-3.2.1mdv2008.0
-+ Revision: 48029
-- Import dtdparser
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.21-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
+* Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.21-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
+* Wed Jul  9 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0:1.21-5
+- drop repotag
+- fix license tag
+
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0:1.21-4jpp.2
+- Autorebuild for GCC 4.3
 
 * Tue Feb 13 2007 Tania Bento <tbento@redhat.com> - 0:1.21-3jpp.1.fc7
 - Fixed the %%Release tag.
@@ -217,3 +188,6 @@ cp -pr doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
 * Sat Jun 23 2001 Guillaume Rousse <guillomovitch@users.sourceforge.net> 1.13-1jpp
 - first Mandrake release
+
+
+
