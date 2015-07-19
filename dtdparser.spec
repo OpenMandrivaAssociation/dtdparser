@@ -31,7 +31,7 @@
 
 Name:           dtdparser
 Version:        1.21
-Release:        15.1
+Release:        15.2
 Summary:        A Java DTD Parser
 Group:		Development/Java
 
