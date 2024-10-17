@@ -39,7 +39,7 @@ Group:		Development/Java
 # There is a LICENSE.INFO file, but it does not specify versions.
 # The only versioning is in the ASL_LICENSE file, which has been edited by the upstream.
 License:        LGPLv2+ or ASL 1.1
-URL:            http://wutka.com/%{name}.html
+URL:            https://wutka.com/%{name}.html
 BuildArch:      noarch
 
 Source0:        http://sourceforge.net/projects/%{name}/files/%{name}/%{version}/%{name}-%{version}.tgz
